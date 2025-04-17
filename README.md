@@ -148,6 +148,36 @@ print(registry_tx[:2])
 EOF
 ```
 
+## Troubleshooting & Gotchas
+
+- **Census ZIP lookups may 400**  
+  Some ZIP Code Tabulation Areas return a `400` or "Request Rejected". If this happens:  
+  - Try a different ZIP or consult the Census docs for alternate endpoints (e.g., ACS surveys)  
+  - Check your `CENSUS_API_KEY` and the API path at https://api.census.gov/data.html  
+
+- **Socrata resource URLs**  
+  The `/api/views/.../rows.json` format isn't a SODA resource endpoint.  
+  - Click **API** on the dataset page in data.austintexas.gov to get the `/resource/<ID>.json` URL  
+  - Use that in `SODA_ENDPOINT`  
+
+- **Codex CLI errors**  
+  Our `run_codex` helper shells out to the `codex` binary. If you see JSON errors or stack traces:  
+  - Ensure you have the official Codex CLI installed and authenticated (`codex run --json` should work)  
+  - As a fallback, you can switch `app/ai.py` to use the Python OpenAI SDK:  
+
+```python
+import os
+import openai
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+def run_codex(prompt: str) -> str:
+    response = openai.ChatCompletion.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    return response.choices[0].message.content
+```
+
 ## Architecture
 - **Backend**: FastAPI service (`app/main.py`)
 - **AI**: Codex CLI integration (`app/ai.py`)
