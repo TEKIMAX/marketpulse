@@ -7,6 +7,17 @@
 
 > On-demand local market analysis toolkit powered by Codex CLI & OpenAI models.
 
+## Our Why
+
+At MarketPulse, we believe that every entrepreneur and non-profit organization deserves access to powerful market analysis tools. Small business owners and mission-driven organizations often lack the resources to conduct comprehensive market research. By leveraging public-sector data and AI, we aim to:
+
+- Democratize market intelligence
+- Empower entrepreneurs to validate ideas and plan growth
+- Support non-profits in understanding community needs and measuring impact
+- Lower the barrier to entry for meaningful insights
+
+With MarketPulse, we make it easy and affordable to gather and analyze local market data, so mission-driven individuals and organizations can focus on making a difference.
+
 MarketPulse leverages public-sector data (U.S. Census Bureau, Socrata portals) and AI to deliver:
 - Competitor landscape mapping
 - Trend summaries across demographics, economy, and news
