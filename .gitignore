@@ -2,11 +2,5 @@ __pycache__/
 *.py[cod]
 env/
 venv/
-.env
-*.sqlite3
-*.db
-*.log
-node_modules/
-dist/
-build/
-Dockerfile*
+*.env
+.DS_Store

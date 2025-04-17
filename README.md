@@ -1,201 +1,71 @@
-<!-- badges -->
-[![Python](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
-[![Docker](https://img.shields.io/badge/docker-ready-blue)](https://www.docker.com/)
-[![License](https://img.shields.io/badge/license-MIT-green)](#license)
+# AI Avatar Video API
 
-# MarketPulse
-
-> On-demand local market analysis toolkit powered by Codex CLI & OpenAI models.
-
-## Our Why
-
-At MarketPulse, we believe that every entrepreneur and non-profit organization deserves access to powerful market analysis tools. Small business owners and mission-driven organizations often lack the resources to conduct comprehensive market research. By leveraging public-sector data and AI, we aim to:
-
-- Democratize market intelligence
-- Empower entrepreneurs to validate ideas and plan growth
-- Support non-profits in understanding community needs and measuring impact
-- Lower the barrier to entry for meaningful insights
-
-With MarketPulse, we make it easy and affordable to gather and analyze local market data, so mission-driven individuals and organizations can focus on making a difference.
-
-MarketPulse leverages public-sector data (U.S. Census Bureau, Socrata portals) and AI to deliver:
-- Competitor landscape mapping
-- Trend summaries across demographics, economy, and news
-- Quick SWOT analyses
-
-## Table of Contents
-1. [Features](#features)
-2. [Getting Started](#getting-started)
-   - [Prerequisites](#prerequisites)
-   - [Installation](#installation)
-   - [Configuration](#configuration)
-3. [Usage](#usage)
-   - [Running the API](#running-the-api)
-   - [API Endpoints](#api-endpoints)
-4. [Data Ingestion Examples](#data-ingestion-examples)
-   - [California Business Patterns](#california-business-patterns)
-   - [Texas Market Data](#texas-market-data)
-5. [Architecture](#architecture)
-6. [Testing](#testing)
-7. [Contributing](#contributing)
-8. [License](#license)
+An open-source FastAPI service to generate AI personas, avatar images, speech audio, and talking avatar videos (similar to Synthesia).
 
 ## Features
-- Competitor landscape mapping (using embeddings + public data)
-- Trend summaries (social media, news, Census & BLS data)
-- SWOT report generation with LLM-powered prompts
-- Extensible ETL for Census & Socrata data sources
+- Generate persona descriptions via OpenAI
+- Create avatar images via Stable Diffusion
+- Produce speech audio via a TTS service
+- Generate lip-synced avatar videos via an external video API
 
-## Getting Started
-
-### Prerequisites
-- Python 3.8+
-- [Codex CLI](https://github.com/openai/codex-cli) installed & authenticated
-- (Optional) Docker & Docker Compose
-
-### Installation
+## Quickstart
 ```bash
-git clone https://github.com/tekimax/marketpulse.git
-cd marketpulse/marketpulse-backend
-python3 -m venv venv
-source venv/bin/activate
+# Clone the repo
+git clone <repo-url>
+cd avatar-api
+
+# Copy example env and set your keys
+cp .env.example .env
+nano .env
+
+# Install dependencies
 pip install -r requirements.txt
-```
 
-### Configuration
-Create a `.env` file in `marketpulse-backend/` with:
-```
-CENSUS_API_KEY=YOUR_CENSUS_API_KEY
-SODA_ENDPOINT=https://data.yourstate.gov/resource/your-dataset.json
-SODA_APP_TOKEN=YOUR_SOCRATA_APP_TOKEN
-CORS_ORIGINS=*
-OPENAI_API_KEY=YOUR_OPENAI_API_KEY
-```
-
-## Usage
-
-### Running the API
-```bash
-cd marketpulse-backend
+# Start the server
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### API Endpoints
-
-#### Health Check
-- **GET /**
-- **Response:**
-```json
-{ "message": "MarketPulse API is running" }
+## Configuration
+Create a `.env` file (see `.env.example`):
+```env
+OPENAI_API_KEY=your_openai_api_key
+STABLE_DIFFUSION_URL=https://your.sd.endpoint
+STABLE_DIFFUSION_API_KEY=your_sd_api_key
+TTS_API_URL=https://your.tts.endpoint
+TTS_API_KEY=your_tts_api_key
+VIDEO_API_URL=https://your.video.service/api/generate
+VIDEO_API_KEY=your_video_service_key
 ```
 
-#### Analyze Prompt
-- **POST /api/ai/analyze**
-- **Request Body:**
-```json
-{ "prompt": "<your prompt text>" }
-```
-- **Response Body:**
-```json
-{ "analysis": "<codex response>" }
-```
+## API Endpoints
 
-## Data Ingestion Examples
+### Health Check
+- **GET /**  
+- Response: `{ "message": "AI Avatar API is running" }`
 
-### California Business Patterns
-```python
-from app.data_ingest import (
-    fetch_census_business_patterns,
-    fetch_census_population_by_zip,
-    fetch_socrata_business_registry,
-)
+### Generate Persona
+- **POST /api/persona**  
+- **Body:** `{ "name": "Alice", "background": "AI researcher" }`  
+- **Response:** `{ "persona_id": "uuid", "description": "..." }`
 
-# California FIPS code = 06
-patterns_ca = fetch_census_business_patterns("06")
-# Example ZIP: 94105
-population_94105 = fetch_census_population_by_zip("94105")
-# CA Socrata endpoint
-registry_ca = fetch_socrata_business_registry("CA", limit=500)
+### Generate Avatar Image
+- **POST /api/avatar/image**  
+- **Body:** `{ "prompt": "Portrait of a friendly AI avatar", "persona_id": "uuid" }`  
+- **Response:** `{ "image_url": "https://..." }`
 
-print(patterns_ca[:2])
-print(population_94105)
-print(registry_ca[:2])
-```
+### Generate Speech Audio
+- **POST /api/tts**  
+- **Body:** `{ "text": "Hello, I'm your AI avatar!", "voice": "default" }`  
+- **Response:** `{ "audio_url": "https://..." }`
 
-### Texas Market Data
-```bash
-export CENSUS_API_KEY=YOUR_KEY
-export SODA_ENDPOINT=https://data.texas.gov/resource/vn28-icjr.json
-export SODA_APP_TOKEN=YOUR_APP_TOKEN
+### Generate Avatar Video
+- **POST /api/avatar/video**  
+- **Body:** `{ "persona_id": "uuid", "text": "Welcome to our demo", "voice": "default" }`  
+- **Response:** `{ "video_url": "https://..." }`
 
-cd marketpulse-backend
-python3 - <<'EOF'
-from app.data_ingest import (
-    fetch_census_business_patterns,
-    fetch_census_population_by_zip,
-    fetch_socrata_business_registry,
-)
-
-# Texas FIPS code = 48
-patterns_tx = fetch_census_business_patterns("48")
-# ZIP code example: 77001
-pop_77001 = fetch_census_population_by_zip("77001")
-registry_tx = fetch_socrata_business_registry("TX", limit=500)
-
-print(patterns_tx[:2])
-print(pop_77001)
-print(registry_tx[:2])
-EOF
-```
-
-## Troubleshooting & Gotchas
-
-- **Census ZIP lookups may 400**  
-  Some ZIP Code Tabulation Areas return a `400` or "Request Rejected". If this happens:  
-  - Try a different ZIP or consult the Census docs for alternate endpoints (e.g., ACS surveys)  
-  - Check your `CENSUS_API_KEY` and the API path at https://api.census.gov/data.html  
-
-- **Socrata resource URLs**  
-  The `/api/views/.../rows.json` format isn't a SODA resource endpoint.  
-  - Click **API** on the dataset page in data.austintexas.gov to get the `/resource/<ID>.json` URL  
-  - Use that in `SODA_ENDPOINT`  
-
-- **Codex CLI errors**  
-  Our `run_codex` helper shells out to the `codex` binary. If you see JSON errors or stack traces:  
-  - Ensure you have the official Codex CLI installed and authenticated (`codex run --json` should work)  
-  - As a fallback, you can switch `app/ai.py` to use the Python OpenAI SDK:  
-
-```python
-import os
-import openai
-openai.api_key = os.getenv("OPENAI_API_KEY")
-
-def run_codex(prompt: str) -> str:
-    response = openai.ChatCompletion.create(
-        model="gpt-4o",
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return response.choices[0].message.content
-```
-
-## Architecture
-- **Backend**: FastAPI service (`app/main.py`)
-- **AI**: Codex CLI integration (`app/ai.py`)
-- **Ingestion**: Census & Socrata (`app/data_ingest.py`)
-- **Container**: Docker support via `Dockerfile`
-
-## Testing
-```bash
-cd marketpulse-backend
-pip install -r requirements-dev.txt
-pytest
-```
-
-## Contributing
-1. Fork the repository
-2. Create a branch: `git checkout -b feature/your-feature`
-3. Commit your changes
-4. Open a Pull Request
+## Troubleshooting
+- Ensure all environment variables are set correctly.  
+- Check external service URLs and API keys.  
 
 ## License
-This project is licensed under the MIT License.
+MIT
